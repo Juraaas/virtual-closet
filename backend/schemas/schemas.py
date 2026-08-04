@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr
-from app.models.models import ClothingCategory
+from models.models import ClothingCategory
 
 class UserCreate(BaseModel):
     email: EmailStr

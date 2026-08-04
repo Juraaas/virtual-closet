@@ -1,9 +1,9 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models.models import ClothingCategory, ClothingItem
-from app.schemas.schemas import ClothingItemOut
+from database import get_db
+from models.models import ClothingCategory, ClothingItem
+from schemas.schemas import ClothingItemOut
  
 router = APIRouter(prefix="/wardrobe", tags=["wardrobe"])
 
