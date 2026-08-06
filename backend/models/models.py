@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Table
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -31,6 +31,7 @@ class User(Base):
 
     silhouette_image_path = Column(String, nullable=True)
     silhouette_processed_path = Column(String, nullable=True)
+    silhouette_keypoints = Column(JSONB, nullable=True)
 
     clothing_items = relationship("ClothingItem", back_populates="owner")
     outfits = relationship("Outfit", back_populates="owner")
