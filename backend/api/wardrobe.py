@@ -5,6 +5,7 @@ from database import get_db
 from models.models import ClothingCategory, ClothingItem
 from schemas.schemas import ClothingItemOut
 from services import storage
+from services.segmentation import SegmentationError, remove_background
  
 router = APIRouter(prefix="/wardrobe", tags=["wardrobe"])
 
@@ -43,7 +44,19 @@ async def create_clothing_item(
     description: str | None = None,
     db: Session = Depends(get_db),
 ):
-    object_key = storage.upload_file(file, folder="clothing")
+    image_bytes = await file.read()
+    file.file.seek(0)
+    original_key = storage.upload_file(file, folder="clothing")
+
+    segmented_key = None
+    try:
+        segmented_bytes = remove_background(image_bytes)
+        segmented_key = storage.upload_bytes(
+            segmented_bytes, folder="clothing_segmented", extension="png",
+            content_type="image/png"
+        )
+    except SegmentationError:
+        pass
  
     item = ClothingItem(
         owner_id=owner_id,
@@ -51,7 +64,8 @@ async def create_clothing_item(
         category=category,
         color=color,
         description=description,
-        original_image_path=object_key,
+        original_image_path=original_key,
+        segmented_image_path=segmented_key,
     )
     db.add(item)
     db.commit()
