@@ -14,6 +14,7 @@ class UserOut(BaseModel):
     email: EmailStr
     silhouette_image_path: str | None = None
     silhouette_processed_path: str | None = None
+    silhouette_keypoints: dict | None = None
     created_at: datetime
 
 class ClothingItemCreate(BaseModel):
@@ -45,3 +46,6 @@ class OutfitOut(BaseModel):
     name: str
     items: list[ClothingItemOut]
     created_at: datetime
+
+class UserCreateSimple(BaseModel):
+    email: EmailStr
