@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.models import ClothingCategory, ClothingItem
 from schemas.schemas import ClothingItemOut
+from services import storage
  
 router = APIRouter(prefix="/wardrobe", tags=["wardrobe"])
 
@@ -19,6 +20,19 @@ def get_clothing_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Clothing item not found")
     return item
 
+@router.get("/{item_id}/image-url")
+def get_clothing_item_image_url(item_id: uuid.UUID, db: Session = Depends(get_db)):
+    item = db.query(ClothingItem).filter(ClothingItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Clothing item not found")
+
+    original_url = storage.get_presigned_url(item.original_image_path)
+    segmented_url = (
+        storage.get_presigned_url(item.segmented_image_path)
+        if segmented_image_path else None 
+    )
+    return {"original_url": original_url, "segmented_url": segmented_url}
+
 @router.post("/", response_model=ClothingItemOut)
 async def create_clothing_item(
     owner_id: uuid.UUID,
@@ -29,9 +43,7 @@ async def create_clothing_item(
     description: str | None = None,
     db: Session = Depends(get_db),
 ):
-    # TODO: replace with actual upload to S3/MinIO via services/storage.py
-    # and trigger background segmentation via services/segmentation.py
-    original_image_path = f"placeholder/{file.filename}"
+    object_key = storage.upload_file(file, folder="clothing")
  
     item = ClothingItem(
         owner_id=owner_id,
@@ -39,7 +51,7 @@ async def create_clothing_item(
         category=category,
         color=color,
         description=description,
-        original_image_path=original_image_path,
+        original_image_path=object_key,
     )
     db.add(item)
     db.commit()
@@ -51,6 +63,11 @@ def delete_clothing_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
     item = db.query(ClothingItem).filter(ClothingItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Clothing item not found")
+
+    storage.delete_file(item.original_image_path)
+    if item.segmented_image_path:
+        storage.delete_file(item.segmented_image_path)
+
     db.delete(item)
     db.commit()
     return {"detail": "Deleted"}
