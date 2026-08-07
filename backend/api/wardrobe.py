@@ -30,7 +30,7 @@ def get_clothing_item_image_url(item_id: uuid.UUID, db: Session = Depends(get_db
     original_url = storage.get_presigned_url(item.original_image_path)
     segmented_url = (
         storage.get_presigned_url(item.segmented_image_path)
-        if segmented_image_path else None 
+        if item.segmented_image_path else None 
     )
     return {"original_url": original_url, "segmented_url": segmented_url}
 
