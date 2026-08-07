@@ -20,6 +20,7 @@ numpy==1.26.4
 pillow==10.4.0
 rembg==2.0.59
 onnxruntime==1.19.2
+requests==2.32.3
 
 # --- Auth ---
 python-jose[cryptography]==3.3.0
