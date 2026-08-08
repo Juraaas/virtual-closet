@@ -24,24 +24,46 @@ CATEGORY_ANCHOR_KEYPOINTS = {
         "padding_bottom": 0.05,
         "padding_sides": 0.6,
     },
-    "shoes": {
-        "top_left": "left_ankle",
-        "top_right": "right_ankle",
-        "bottom_left": "left_ankle",
-        "bottom_right": "right_ankle",
-        "padding_top": 0.3,
-        "padding_bottom": 0.6,
-        "padding_sides": 0.6,
-    },
 }
 
+def _shoes_bounding_box(keypoints: dict) -> tuple[int, int, int, int]:
+    required = ["left_ankle", "right_ankle", "left_knee", "right_knee"]
+    missing = [k for k in required if k not in keypoints]
+    if missing:
+        raise WarpError(f"Missing required keypoint(s) for shoes: {missing}")
+ 
+    left_ankle = keypoints["left_ankle"]
+    right_ankle = keypoints["right_ankle"]
+    left_knee = keypoints["left_knee"]
+    right_knee = keypoints["right_knee"]
+ 
+    shin_length = (
+        abs(left_ankle["y_px"] - left_knee["y_px"])
+        + abs(right_ankle["y_px"] - right_knee["y_px"])
+    ) / 2
+ 
+    shoe_height = shin_length * 0.5
+    shoe_half_width = shin_length * 0.35
+ 
+    all_x = [left_ankle["x_px"], right_ankle["x_px"]]
+    all_y = [left_ankle["y_px"], right_ankle["y_px"]]
+ 
+    left = min(all_x) - shoe_half_width
+    right = max(all_x) + shoe_half_width
+    top = min(all_y) - shoe_height * 0.3
+    bottom = max(all_y) + shoe_height * 0.7
+ 
+    return int(left), int(top), int(right), int(bottom)
 
 def _bounding_box_from_keypoints(keypoints: dict, category: str) -> tuple[int, int, int, int]:
+    if category == "shoes":
+        return _shoes_bounding_box(keypoints)
+ 
     if category not in CATEGORY_ANCHOR_KEYPOINTS:
         raise WarpError(f"No overlay logic defined for category '{category}' yet")
-
+ 
     anchors = CATEGORY_ANCHOR_KEYPOINTS[category]
-
+ 
     try:
         tl = keypoints[anchors["top_left"]]
         tr = keypoints[anchors["top_right"]]
@@ -49,23 +71,23 @@ def _bounding_box_from_keypoints(keypoints: dict, category: str) -> tuple[int, i
         br = keypoints[anchors["bottom_right"]]
     except KeyError as e:
         raise WarpError(f"Missing required keypoint: {e}")
-
+ 
     all_x = [tl["x_px"], tr["x_px"], bl["x_px"], br["x_px"]]
     all_y = [tl["y_px"], tr["y_px"], bl["y_px"], br["y_px"]]
-
+ 
     left = min(all_x)
     right = max(all_x)
     top = min(all_y)
     bottom = max(all_y)
-
+ 
     width = right - left
     height = bottom - top
-
+ 
     left -= int(width * anchors["padding_sides"])
     right += int(width * anchors["padding_sides"])
     top -= int(height * anchors["padding_top"])
     bottom += int(height * anchors["padding_bottom"])
-
+ 
     return left, top, right, bottom
 
 
