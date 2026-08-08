@@ -11,9 +11,9 @@ CATEGORY_ANCHOR_KEYPOINTS = {
         "top_right": "right_shoulder",
         "bottom_left": "left_hip",
         "bottom_right": "right_hip",
-        "padding_top": 0.25,     
+        "padding_top": 0.35,     
         "padding_bottom": 0.05,
-        "padding_sides": 0.25,
+        "padding_sides": 0.45,
     },
     "bottom": {
         "top_left": "left_hip",
