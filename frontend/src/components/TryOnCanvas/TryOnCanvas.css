@@ -1,0 +1,43 @@
+.tryon-canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 32px;
+}
+
+.tryon-canvas__preview {
+  width: 420px;
+  height: 560px;
+  background: #fafafa;
+  border-radius: 16px;
+  border: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.tryon-canvas__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tryon-canvas__selectors {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tryon-canvas__status {
+  color: #888;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 40px;
+}
+
+.tryon-canvas__status--error {
+  color: #c0392b;
+}
